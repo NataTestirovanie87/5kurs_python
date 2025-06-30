@@ -69,7 +69,7 @@ def test_form_field_colors():
         expected_red_bg = "rgba(248, 215, 218, 1)"  # #f8d7da
 
         assert bg_color_zip == expected_red_bg, (
-            f"Цвет Полеполя zip-code{bg_color_zip}, ожидаем: {expected_red_bg}"
+            f"Цвет поля zip-code{bg_color_zip}, ожидаем: {expected_red_bg}"
         )
 
         # Проверка цвета фона остальных полей (ожидается зеленый)

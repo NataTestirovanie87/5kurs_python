@@ -30,12 +30,10 @@ def page(api):
 def unique_title():
     return f"Тестовый проект {int(time.time())}"
 
-# --- Тесты ---
 
-
-# 1. get_project_list - позитивный тест (используем существующие проекты)
 @pytest.mark.positive_test_yougile
 def test_get_project(api):
+    # позитивный тест (используем существующие проекты)
     response = api.get_project_list()
     assert response.status_code == 200
     data = response.json()
@@ -43,9 +41,9 @@ def test_get_project(api):
     assert isinstance(projects, list)
 
 
-# 2. create_project - позитивный тест (создаем новый проект)
 @pytest.mark.positive_test_yougile
 def test_create_project_positive(page):
+    # позитивный тест (создаем новый проект)
     title = unique_title()
     users = {"f1f27914-9417-4cf2-905e-0053bea90a5c": "admin"}
 
@@ -73,9 +71,9 @@ def test_create_project_positive(page):
     assert last_proj["title"] == title
 
 
-# 3. create_project - негативный тест (пустой заголовок)
 @pytest.mark.negative_test_yougile
 def test_create_project_negative_empty_title(page):
+    # негативный тест (пустой заголовок)
     users = {"f1f27914-9417-4cf2-905e-0053bea90a5c": "admin"}
 
     response = page.create_project(title="", users=users)
@@ -84,9 +82,9 @@ def test_create_project_negative_empty_title(page):
     assert response.status_code in [400, 422]
 
 
-# 4. edit_project - позитивный тест (изменение названия)
 @pytest.mark.positive_test_yougile
 def test_edit_project_positive(page):
+    # позитивный тест (изменение названия)
     title_orig = unique_title()
 
     create_resp = page.create_project(
@@ -110,9 +108,9 @@ def test_edit_project_positive(page):
     assert data["title"] == new_title
 
 
-# 5. edit_project - негативный тест (несуществующий ID)
 @pytest.mark.negative_test_yougile
 def test_edit_nonexistent():
+    # негативный тест (несуществующий ID)
     fake_id = 9999999999
     api_instance = Yougile_API(BASE_URL, LOGIN, PASSWORD, COMPANY_NAME)
     # Получаем токен для этого экземпляра
@@ -124,9 +122,9 @@ def test_edit_nonexistent():
     assert response.status_code in [404]
 
 
-# 6. search_project_by_id - позитивный тест (существующий проект)
 @pytest.mark.positive_test_yougile
 def test_search_existing(page):
+    # позитивный тест (существующий проект)
     title = unique_title()
     create_resp = page.create_project(
         title=title, users={
@@ -139,9 +137,9 @@ def test_search_existing(page):
     assert data["id"] == project_id
 
 
-# 7. search_nonexistent - негативный тест (неправильный ID)
 @pytest.mark.negative_test_yougile
 def test_search_nonexistent():
+    # негативный тест (неправильный ID)
     fake_id = 9999999999
     api_instance = Yougile_API(BASE_URL, LOGIN, PASSWORD, COMPANY_NAME)
     company_id = api_instance.get_id_company()
@@ -149,5 +147,5 @@ def test_search_nonexistent():
     api_instance.get_key()
 
     response = api_instance.search_project_by_id(fake_id)
-    # Предполагается статус 404 
+    # Предполагается статус 404
     assert response.status_code in [404]

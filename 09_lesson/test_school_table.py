@@ -2,6 +2,7 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy import MetaData, Table, select, insert, update, delete
 from sqlalchemy.orm import sessionmaker
+import sqlalchemy.exc as exc
 
 # Строка подключения к базе данных
 
@@ -97,17 +98,6 @@ def test_delete_group_student(db_session):
     db_session.execute(ins_link)
     db_session.commit()
 
-    # удаляем связь, чтобы создать новую
-    del_existing = delete(group_students).where(
-        (group_students.c.user_id == temp_user_id) &
-        (group_students.c.group_id == temp_group_id))
-    db_session.execute(del_existing)
-    db_session.commit()
-    # Повторно вставляем
-    db_session.execute(insert(group_students).values(
-        user_id=temp_user_id, group_id=temp_group_id))
-    db_session.commit()
-
     # Теперь удаляем связь как часть теста
     del_stmt = delete(group_students).where(
         (group_students.c.user_id == temp_user_id) &
@@ -123,3 +113,45 @@ def test_delete_group_student(db_session):
     result_after_del = db_session.execute(sel_after_del).first()
 
     assert result_after_del is None
+
+
+@pytest.mark.negative_test_db
+def test_update_nonexistent_student(db_session):
+    # обновление несуществующего студента
+    non_existent_user_id = 9999999  # ID, которого нет в базе
+
+    # Попытка обновить несуществующего пользователя
+    upd = update(students).where(
+        students.c.user_id == non_existent_user_id).values(level='Эксперт')
+    result = db_session.execute(upd)
+    db_session.commit()
+
+    # Проверяем, что ни одна строка не была обновлена
+    assert result.rowcount == 0
+
+
+@pytest.mark.negative_test_db
+def test_delete_nonexistent_group_student(db_session):
+    # Негативный тест: попытка удалить несуществующую связь студент-группа
+    non_existent_user_id = 777777
+    non_existent_group_id = 88888
+
+    del_stmt = delete(group_students).where(
+        (group_students.c.user_id == non_existent_user_id) &
+        (group_students.c.group_id == non_existent_group_id))
+    result = db_session.execute(del_stmt)
+    db_session.commit()
+
+    # Проверяем, что удалено ничего не было
+    assert result.rowcount == 0
+
+
+@pytest.mark.negative_test_db
+def test_insert_subject_with_null_title():
+    # Попытка вставить  None в обязательное поле subject_title
+    with pytest.raises(exc.IntegrityError):
+        # Выполняем вставку с None для subject_title
+        stmt = insert(subjects).values(subject_title=None)
+        with engine.connect() as conn:
+            conn.execute(stmt)
+            conn.commit()

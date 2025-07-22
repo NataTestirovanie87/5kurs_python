@@ -10,7 +10,12 @@ class CheckoutPage:
         self.wait = WebDriverWait(driver, 10)
 
     @allure.step("Заполнить информацию о покупателе")
-    def fill_in_customer_info(self, first_name: str, last_name: str, postal_code: int) -> None:
+    def fill_in_customer_info(
+        self,
+        first_name: str,
+        last_name: str,
+        postal_code: int
+    ) -> None:
         """
         Заполняет поля формы с информацией о покупателе.
         """
@@ -35,7 +40,7 @@ class CheckoutPage:
         continue_button.click()
 
     @allure.step("Получить итоговую сумму из страницы")
-    def get_total_amount(self) -> None:
+    def get_total_amount(self) -> str:
         """
         Возвращает текст итоговой суммы заказа.
         """

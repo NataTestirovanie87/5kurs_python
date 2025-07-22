@@ -1,6 +1,7 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import allure
 
 
 class CartPage:
@@ -8,6 +9,7 @@ class CartPage:
         self.driver = driver
         self.wait = WebDriverWait(driver, 10)
 
+    @allure.step("Перейти к оформлению заказа")
     def proceed_to_checkout(self) -> None:
         """
         Метод для перехода к оформлению заказа.
